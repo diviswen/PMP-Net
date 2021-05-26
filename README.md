@@ -1,7 +1,7 @@
 # PMP-Net
 
 This repository contains the source code for the paper [PMP-Net: Point Cloud Completion by Learning Multi-step Point Moving Paths](https://arxiv.org/abs/2012.03408).
-![Network](pics/Network.png)
+[<img src="pics/network.png" width="100%" alt="Intro pic" />](pics/network.png)
 
 ## Cite this work
 
@@ -82,3 +82,7 @@ then use the following command:
 python main_*.py --test
 python main_*.py --inference
 ```
+
+## License
+
+This project is open sourced under MIT license.
