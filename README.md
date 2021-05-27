@@ -6,8 +6,8 @@ This repository contains the source code for the paper [PMP-Net: Point Cloud Com
 ## Cite this work
 
 ```
-@inproceedings{wen2020pmp,
-  title={{PMP-Net: Point cloud completion by learning multi-step point moving paths}},
+@inproceedings{wen2021pmp,
+  title={PMP-Net: Point cloud completion by learning multi-step point moving paths},
   author={Wen, Xin and Xiang, Peng and Han, Zhizhong and Cao, Yan-Pei and Wan, Pengfei and Zheng, Wen and Liu, Yu-Shen},
   booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
   year={2021}
@@ -63,7 +63,7 @@ __C.DATASET.TRAIN_DATASET                        = 'ShapeNet'
 __C.DATASET.TEST_DATASET                         = 'ShapeNet'
 ```
 
-## Get Started
+## Getting Started
 
 To train PMP-Net, you can simply use the following command:
 
