@@ -1,6 +1,6 @@
-# PMP-Net
+# PMP-Net: Point Cloud Completion by Learning Multi-step Point Moving Paths
 
-This repository contains the source code for the paper [PMP-Net: Point Cloud Completion by Learning Multi-step Point Moving Paths](https://arxiv.org/abs/2012.03408).
+This repository contains the source code for the paper [PMP-Net: Point Cloud Completion by Learning Multi-step Point Moving Paths](https://arxiv.org/abs/2012.03408). The project page is [here](https://arxiv.org/abs/2012.03408).
 [<img src="pics/network.png" width="100%" alt="Intro pic" />](pics/network.png)
 
 ## Cite this work
@@ -82,6 +82,10 @@ then use the following command:
 python main_*.py --test
 python main_*.py --inference
 ```
+
+## Acknowledgements
+
+Some of the code of this repo is borrowed from [GRNet](https://github.com/hzxie/GRNet) and [pytorchpointnet++](https://github.com/erikwijmans/Pointnet2_PyTorch). We thank the authors for their great job!
 
 ## License
 
