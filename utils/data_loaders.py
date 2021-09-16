@@ -506,8 +506,8 @@ class Completion3DDataLoader(object):
     def get_dataset(self, subset):
         file_list = self._get_file_list(self.cfg, self._get_subset(subset))
         transforms = self._get_transforms(self.cfg, subset)
-        # required_items = ['partial_cloud'] if subset == DatasetSubset.TEST else ['partial_cloud', 'gtcloud']
-        required_items = ['partial_cloud', 'gtcloud']
+        required_items = ['partial_cloud'] if subset == DatasetSubset.TEST else ['partial_cloud', 'gtcloud']
+        # required_items = ['partial_cloud', 'gtcloud']
         return Dataset({
             'required_items': required_items,
             'shuffle': subset == DatasetSubset.TRAIN
@@ -528,10 +528,15 @@ class Completion3DDataLoader(object):
                 'callback': 'ToTensor',
                 'objects': ['partial_cloud', 'gtcloud']
             }])
-        else:
+        elif subset == DatasetSubset.VAL:
             return utils.data_transforms.Compose([{
                 'callback': 'ToTensor',
                 'objects': ['partial_cloud', 'gtcloud']
+            }])
+        else:
+            return utils.data_transforms.Compose([{
+                'callback': 'ToTensor',
+                'objects': ['partial_cloud']
             }])
 
     def _get_subset(self, subset):
