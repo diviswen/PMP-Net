@@ -12,8 +12,8 @@ cfg                                              = __C
 __C.DATASETS                                     = edict()
 __C.DATASETS.COMPLETION3D                        = edict()
 __C.DATASETS.COMPLETION3D.CATEGORY_FILE_PATH     = './datasets/Completion3D.json'
-__C.DATASETS.COMPLETION3D.PARTIAL_POINTS_PATH    = '/data/shapenet/%s/partial/%s/%s.h5'
-__C.DATASETS.COMPLETION3D.COMPLETE_POINTS_PATH   = '/data/shapenet/%s/gt/%s/%s.h5'
+__C.DATASETS.COMPLETION3D.PARTIAL_POINTS_PATH    = '/data/xp/data/shapenet/shapenet/%s/partial/%s/%s.h5'
+__C.DATASETS.COMPLETION3D.COMPLETE_POINTS_PATH   = '/data/xp/data/shapenet/shapenet/%s/gt/%s/%s.h5'
 __C.DATASETS.SHAPENET                            = edict()
 __C.DATASETS.SHAPENET.CATEGORY_FILE_PATH         = './datasets/ShapeNet.json'
 __C.DATASETS.SHAPENET.N_RENDERINGS               = 8
@@ -42,9 +42,9 @@ __C.CONST.N_INPUT_POINTS                         = 2048
 #
 
 __C.DIR                                          = edict()
-__C.DIR.OUT_PATH                                 = '/data/output'
+__C.DIR.OUT_PATH                                 = './exp/output'
 __C.CONST.DEVICE                                 = '0'
-__C.CONST.WEIGHTS                                = 'ckpt-best.pth'  # specify a path to run test and inference
+__C.CONST.WEIGHTS                                = ''  # ./pretrained/completion3d/ckpt-best-plus.pth
 
 #
 # Memcached

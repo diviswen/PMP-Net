@@ -18,8 +18,8 @@ __C.DATASETS.SHAPENET                            = edict()
 __C.DATASETS.SHAPENET.CATEGORY_FILE_PATH         = './datasets/ShapeNet.json'
 __C.DATASETS.SHAPENET.N_RENDERINGS               = 8
 __C.DATASETS.SHAPENET.N_POINTS                   = 16384
-__C.DATASETS.SHAPENET.PARTIAL_POINTS_PATH        = '/data/PCN/%s/partial/%s/%s/%02d.pcd'
-__C.DATASETS.SHAPENET.COMPLETE_POINTS_PATH       = '/data/PCN/%s/complete/%s/%s.pcd'
+__C.DATASETS.SHAPENET.PARTIAL_POINTS_PATH        = '/data/xp/data/PCN/%s/partial/%s/%s/%02d.pcd'
+__C.DATASETS.SHAPENET.COMPLETE_POINTS_PATH       = '/data/xp/data/PCN/%s/complete/%s/%s.pcd'
 
 #
 # Dataset
@@ -42,9 +42,9 @@ __C.CONST.N_INPUT_POINTS                         = 2048
 #
 
 __C.DIR                                          = edict()
-__C.DIR.OUT_PATH                                 = '/data/output'
+__C.DIR.OUT_PATH                                 = './exp/output'
 __C.CONST.DEVICE                                 = '0'
-__C.CONST.WEIGHTS                                = 'ckpt-best.pth'  # specify a path to run test and inference
+__C.CONST.WEIGHTS                                = ''  # './pretrained/pcn/ckpt-best-pmpplus.pth specify' a path to run test and inference
 
 #
 # Memcached

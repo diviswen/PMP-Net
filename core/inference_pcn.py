@@ -8,7 +8,7 @@ import utils.data_loaders
 import utils.helpers
 import utils.io
 from tqdm import tqdm
-from models.model import ModelNoise as Model
+from models.model import PMPNetPlus as Model
 
 
 def random_subsample(pcd, n_points=2048):
@@ -39,11 +39,12 @@ def inference_net(cfg):
                                                    pin_memory=True,
                                                    shuffle=False)
 
-    model = Model()
+    model = Model(dataset=cfg.DATASET.TRAIN_DATASET)
 
     if torch.cuda.is_available():
         model = torch.nn.DataParallel(model).cuda()
 
+    assert 'WEIGHTS' in cfg.CONST and cfg.CONST.WEIGHTS
     # Load the pretrained model from a checkpoint
     logging.info('Recovering from %s ...' % (cfg.CONST.WEIGHTS))
     checkpoint = torch.load(cfg.CONST.WEIGHTS)

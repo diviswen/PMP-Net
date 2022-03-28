@@ -1,4 +1,4 @@
-# PMP-Net: Point Cloud Completion by Learning Multi-step Point Moving Paths
+# PMP-Net++: Point Cloud Completion by Transformer-Enhanced Multi-step Point Moving Paths
 
 This repository contains the source code for the paper [PMP-Net: Point Cloud Completion by Learning Multi-step Point Moving Paths](https://arxiv.org/abs/2012.03408). The project page is [here](https://arxiv.org/abs/2012.03408).
 [<img src="pics/network.png" width="100%" alt="Intro pic" />](pics/network.png)
@@ -6,11 +6,22 @@ This repository contains the source code for the paper [PMP-Net: Point Cloud Com
 ## Cite this work
 
 ```
+@ARTICLE{pmpnet++,
+    author={Wen, Xin and Xiang, Peng and Han, Zhizhong and Cao, Yan-Pei and Wan, Pengfei and Zheng, Wen and Liu, Yu-Shen},
+    journal={IEEE Transactions on Pattern Analysis and Machine Intelligence}, 
+    title={PMP-Net++: Point Cloud Completion by Transformer-Enhanced Multi-step Point Moving Paths}, 
+    year={2022},
+    volume={},
+    number={},
+    pages={1-1},
+    doi={10.1109/TPAMI.2022.3159003}
+}
+
 @inproceedings{wen2021pmp,
-  title={PMP-Net: Point cloud completion by learning multi-step point moving paths},
-  author={Wen, Xin and Xiang, Peng and Han, Zhizhong and Cao, Yan-Pei and Wan, Pengfei and Zheng, Wen and Liu, Yu-Shen},
-  booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
-  year={2021}
+    title={PMP-Net: Point cloud completion by learning multi-step point moving paths},
+    author={Wen, Xin and Xiang, Peng and Han, Zhizhong and Cao, Yan-Pei and Wan, Pengfei and Zheng, Wen and Liu, Yu-Shen},
+    booktitle={Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},
+    year={2021}
 }
 ```
 
@@ -33,7 +44,9 @@ Backup Links:
 
 ```
 cd PMP-Net
-pip install -r requirements.txt
+conda create -n pmp python=3.7
+conda activate pmp
+pip3 install -r requirements.txt
 ```
 
 #### Build PyTorch Extensions
@@ -65,10 +78,10 @@ __C.DATASET.TEST_DATASET                         = 'ShapeNet'
 
 ## Getting Started
 
-To train PMP-Net, you can simply use the following command:
+To train PMP-Net++ or PMP-Net, you can simply use the following command:
 
 ```
-python main_*.py  # remember to change '*' to 'c3d' or 'pcn'
+python main_*.py  # remember to change '*' to 'c3d' or 'pcn', and change between 'import PMPNetPlus' and 'import PMPNet'
 ```
 
 To test or inference, you should specify the path of checkpoint if the config_*.py file

@@ -33,7 +33,7 @@ class Compose(object):
                 for k, v in data.items():
                     if k in objects and k in data:
                         if transform.__class__ in [
-                                RandomCrop, RandomFlip, RandomRotatePoints, RandomScalePoints, RandomMirrorPoints
+                                RandomCrop, RandomFlip, RandomRotatePoints, ScalePoints, RandomMirrorPoints
                         ]:
                             data[k] = transform(v, rnd_value)
                         else:
@@ -108,6 +108,20 @@ class RandomCrop(object):
         img = img[..., np.newaxis] if len(img.shape) == 2 else img
 
         return img
+
+class ScalePoints(object):
+    def __init__(self, parameters):
+        self.scale = None
+        if 'scale' in parameters:
+            self.scale = parameters['scale']
+
+    def __call__(self, ptcloud, rnd_value):
+        if self.scale is not None:
+            scale = self.scale
+        else:
+            scale = np.random.randint(85, 95) * 0.01
+        ptcloud = ptcloud * scale
+        return ptcloud
 
 
 class RandomFlip(object):

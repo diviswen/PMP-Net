@@ -10,7 +10,6 @@ import logging
 import numpy as np
 import random
 import torch.utils.data.dataset
-import h5py as H
 import os
 import open3d as o3d
 import utils.data_transforms
@@ -153,205 +152,6 @@ class MyShapeNetDataSet(torch.utils.data.dataset.Dataset):
 
 
 
-
-
-class CascadeDataset(torch.utils.data.dataset.Dataset):
-    def __init__(self, phase='train'):
-        base_dir = '/data1/xp/cascaded'
-        if phase in {'train', 'valid', 'test'}:
-            with H.File(os.path.join(base_dir, '{}_data.h5'.format(phase)), 'r') as f:
-                self.gt = f['complete_pcds'][:]
-                self.partial = f['incomplete_pcds'][:]
-                self.labels = f['labels'][:]
-                self.classes = f['classes'][:]
-
-        self.transform = self._get_transforms(phase)
-
-    def _get_transforms(self, subset):
-        if subset == 'train':
-            return utils.data_transforms.Compose([{
-                'callback': 'RandomMirrorPoints',
-                'objects': ['partial_cloud', 'gtcloud']
-            }, {
-                'callback': 'ToTensor',
-                'objects': ['partial_cloud', 'gtcloud']
-            }])
-        else:
-            return utils.data_transforms.Compose([{
-                'callback': 'ToTensor',
-                'objects': ['partial_cloud', 'gtcloud']
-            }])
-
-    def __len__(self):
-        return len(self.gt)
-
-    def __getitem__(self, idx):
-
-        data = {'partial_cloud': self.partial[idx], 'gtcloud': self.gt[idx]}
-        data = self.transform(data)
-        return label_mapping[self.labels[idx]], self.classes[idx].astype(str), data
-
-
-def load_completion3d_data(phase='train'):
-    path = '/data1/xp/shapenet'
-    if phase in {'train', 'val'}:
-        codes = ['02691156', '02958343', '03636649', '03001627', '04379243', '02933112', '04530566', '04256520']
-        code_len = 8
-    else:
-        codes = ['all']
-        code_len = 3
-
-    partial_d = {}
-    gt_d = {}
-    model_id_d = {}
-    for code in codes:
-        partial_d[code] = []
-        gt_d[code] = []
-        model_id_d[code] = []
-
-    with open(os.path.join(path, '{}.list'.format(phase)), 'r') as f:
-        file_list = f.readlines()
-    print('loading phase {}...'.format(phase))
-    tqdm_obj = tqdm(file_list)
-    for f in tqdm_obj:
-        encode = f[:code_len]
-        model_id = f[code_len+1:-1]
-        filename = model_id + '.h5'
-        pcd_file = H.File(os.path.join(path, phase, 'partial', encode, filename), 'r')
-        pcd = np.array(pcd_file['data'])
-        pcd_file.close()
-        partial_d[encode].append(pcd.astype(np.float64))
-        pcd_file = H.File(os.path.join(path, phase, 'gt', encode, filename), 'r')
-        pcd = np.array(pcd_file['data'])
-        pcd_file.close()
-        gt_d[encode].append(pcd.astype(np.float64))
-        model_id_d[encode].append(model_id)
-
-        # tqdm_obj.set_description('encode {} model_id {}'.format(encode, model_id))
-    print('loaded phase {}!'.format(phase))
-    if phase == 'train':
-        for code in codes:
-            n = len(partial_d[code]) % 16
-            if n > 0:
-                partial_d[code] = partial_d[code][:-n]
-                gt_d[code] = gt_d[code][:-n]
-                model_id_d[code] = model_id_d[code][:-n]
-
-    partial, gt, model_id, taximony_id = [], [], [], []
-    for code in codes:
-        partial.append(np.array(partial_d[code]))
-        gt.append(np.array(gt_d[code]))
-        model_id.extend(model_id_d[code])
-        taximony_id.extend([code for i in range(len(partial_d[code]))])
-
-    partial = np.concatenate(partial)
-    gt = np.concatenate(gt)
-
-    return partial, gt, model_id, taximony_id
-
-'''
-def load_completion3d_data_of_type(path, encode, phase='train'):
-    train_list = open(os.path.join(path, '{}.list'.format(phase)), 'r')
-    partial = []
-    gt = []
-    model_id_list = []
-    print('loading phase {}, code {}'.format(phase, encode))
-    for f in train_list:
-        if f.startswith(encode):
-            model_id = f[len(encode)+1:-1]
-            model_id_list.append(model_id)
-            filename = model_id + '.h5'
-            pcd_file = H.File(os.path.join(path, phase, 'partial', encode, filename), 'r')
-            pcd = np.array(pcd_file['data'])
-            pcd_file.close()
-            partial.append(pcd.astype(np.float64))
-            pcd_file = H.File(os.path.join(path, phase, 'gt', encode, filename), 'r')
-            pcd = np.array(pcd_file['data'])
-            pcd_file.close()
-            gt.append(pcd.astype(np.float64))
-
-    partial = np.array(partial)
-    gt = np.array(gt)
-
-    if phase == 'train':
-        n = partial.shape[0] % 16
-        if n > 0:
-            partial = partial[:-n]
-            gt = gt[:-n]
-
-    return partial, gt, model_id_list, [encode for i in range(partial.shape[0])]
-
-def load_completion3d_data(phase='train'):
-    path = '/data1/xp/shapenet'
-    if phase in {'train', 'val'}:
-        codes = ['02691156', '02958343', '03636649', '03001627', '04379243', '02933112', '04530566', '04256520']
-    else:
-        codes = ['all']
-
-    partial = []
-    gt = []
-    model_id = []
-    type_id = []
-
-
-    for code in codes:
-        partial_, gt_, model_id_, type_id_ = load_completion3d_data_of_type(path, code, phase=phase)
-        partial.append(partial_)
-        gt.append(gt_)
-        model_id.extend(model_id_)
-        type_id.extend(type_id_)
-
-    return np.concatenate(partial), np.concatenate(gt), model_id, type_id
-'''
-def load_displacement():
-    dis = []
-    print('loading displacement...')
-    for i in range(4):
-        dis.append(np.load('/data1/xp/shapenet/train_displacement_{}.npy'.format(i)))
-    print('displacement loaded...')
-    return np.concatenate(dis, 0)
-
-
-
-class Completion3DDisplacement(torch.utils.data.dataset.Dataset):
-    def __init__(self, phase='train'):
-        super(Completion3DDisplacement, self).__init__()
-
-        self.phase = phase
-        self.partial, self.gt, self.model_id, self.type_id = load_completion3d_data(phase)
-        if self.phase == 'train':
-            self.displacement = load_displacement()
-
-        self.transform = self._get_transforms(phase)
-
-    def _get_transforms(self, phase):
-        if phase == 'train':
-            return utils.data_transforms.Compose([{
-                'callback': 'RandomMirrorPoints',
-                'objects': ['partial_cloud', 'gtcloud', 'displacement']
-            }, {
-                'callback': 'ToTensor',
-                'objects': ['partial_cloud', 'gtcloud', 'displacement']
-            }])
-        else:
-            return utils.data_transforms.Compose([{
-                'callback': 'ToTensor',
-                'objects': ['partial_cloud', 'gtcloud']
-            }])
-
-    def __len__(self):
-        return self.partial.shape[0]
-
-    def __getitem__(self, idx):
-        data = {'partial_cloud': self.partial[idx], 'gtcloud': self.gt[idx]}
-        if self.phase == 'train':
-            data['displacement'] = self.displacement[idx]
-        data = self.transform(data)
-
-        return self.type_id[idx], self.model_id[idx], data
-
-
-
 class Dataset(torch.utils.data.dataset.Dataset):
     def __init__(self, options, file_list, transforms=None):
         self.options = options
@@ -479,9 +279,6 @@ class ShapeNetDataLoader(object):
                     } for i in range(n_renderings)])
                     '''
 
-
-
-
         logging.info('Complete collecting files of the dataset. Total files: %d' % len(file_list))
         return file_list
 
@@ -506,8 +303,7 @@ class Completion3DDataLoader(object):
     def get_dataset(self, subset):
         file_list = self._get_file_list(self.cfg, self._get_subset(subset))
         transforms = self._get_transforms(self.cfg, subset)
-        # required_items = ['partial_cloud'] if subset == DatasetSubset.TEST else ['partial_cloud', 'gtcloud']
-        required_items = ['partial_cloud', 'gtcloud']
+        required_items = ['partial_cloud'] if subset == DatasetSubset.TEST else ['partial_cloud', 'gtcloud']
         return Dataset({
             'required_items': required_items,
             'shuffle': subset == DatasetSubset.TRAIN
@@ -521,8 +317,26 @@ class Completion3DDataLoader(object):
                     'n_points': cfg.CONST.N_INPUT_POINTS
                 },
                 'objects': ['partial_cloud']
-            },  {
+            }, {
                 'callback': 'RandomMirrorPoints',
+                'objects': ['partial_cloud', 'gtcloud']
+            }, {
+                'callback': 'ScalePoints',
+                'parameters': {
+                    'scale': 0.85
+                },
+                'objects': ['partial_cloud', 'gtcloud']
+            },
+                {
+                    'callback': 'ToTensor',
+                    'objects': ['partial_cloud', 'gtcloud']
+                }])
+        elif subset == DatasetSubset.VAL:
+            return utils.data_transforms.Compose([{
+                'callback': 'ScalePoints',
+                'parameters': {
+                    'scale': 0.85
+                },
                 'objects': ['partial_cloud', 'gtcloud']
             }, {
                 'callback': 'ToTensor',
@@ -531,7 +345,7 @@ class Completion3DDataLoader(object):
         else:
             return utils.data_transforms.Compose([{
                 'callback': 'ToTensor',
-                'objects': ['partial_cloud', 'gtcloud']
+                'objects': ['partial_cloud']
             }])
 
     def _get_subset(self, subset):

@@ -9,7 +9,7 @@ from tqdm import tqdm
 from Chamfer3D.dist_chamfer_3D import chamfer_3DDist
 from utils.average_meter import AverageMeter
 from utils.metrics import Metrics
-from models.model import ModelNoise as Model
+from models.model import PMPNetPlus as Model
 chamfer_dist = chamfer_3DDist()
 
 
@@ -47,7 +47,7 @@ def test_net(cfg, epoch_idx=-1, test_data_loader=None, test_writer=None, model=N
         # Set up data loader
         dataset_loader = utils.data_loaders.DATASET_LOADER_MAPPING[cfg.DATASET.TEST_DATASET](cfg)
         test_data_loader = torch.utils.data.DataLoader(dataset=dataset_loader.get_dataset(
-            utils.data_loaders.DatasetSubset.VAL),
+            utils.data_loaders.DatasetSubset.TEST),
                                                        batch_size=1,
                                                        num_workers=cfg.CONST.NUM_WORKERS,
                                                        collate_fn=utils.data_loaders.collate_fn,
@@ -56,10 +56,11 @@ def test_net(cfg, epoch_idx=-1, test_data_loader=None, test_writer=None, model=N
 
     # Setup networks and initialize networks
     if model is None:
-        model = Model()
+        model = Model(dataset=cfg.DATASET.TRAIN_DATASET)
         if torch.cuda.is_available():
             model = torch.nn.DataParallel(model).cuda()
 
+        assert 'WEIGHTS' in cfg.CONST and cfg.CONST.WEIGHTS
         logging.info('Recovering from %s ...' % (cfg.CONST.WEIGHTS))
         checkpoint = torch.load(cfg.CONST.WEIGHTS)
         model.load_state_dict(checkpoint['model'])

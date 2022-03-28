@@ -9,7 +9,7 @@ from tqdm import tqdm
 from Chamfer3D.dist_chamfer_3D import chamfer_3DDist
 from utils.average_meter import AverageMeter
 from utils.metrics import Metrics
-from models.model import Model
+from models.model import PMPNet as Model
 chamfer_dist = chamfer_3DDist()
 
 
@@ -23,8 +23,6 @@ def chamfer_sqrt(p1, p2):
     d1 = torch.mean(torch.sqrt(d1))
     d2 = torch.mean(torch.sqrt(d2))
     return (d1 + d2) / 2
-
-
 
 
 def test_net(cfg, epoch_idx=-1, test_data_loader=None, test_writer=None, model=None):
@@ -44,10 +42,11 @@ def test_net(cfg, epoch_idx=-1, test_data_loader=None, test_writer=None, model=N
 
     # Setup networks and initialize networks
     if model is None:
-        model = Model()
+        model = Model(dataset=cfg.DATASET.TRAIN_DATASET)
         if torch.cuda.is_available():
             model = torch.nn.DataParallel(model).cuda()
 
+        assert 'WEIGHTS' in cfg.CONST and cfg.CONST.WEIGHTS
         logging.info('Recovering from %s ...' % (cfg.CONST.WEIGHTS))
         checkpoint = torch.load(cfg.CONST.WEIGHTS)
         model.load_state_dict(checkpoint['model'])
@@ -71,8 +70,8 @@ def test_net(cfg, epoch_idx=-1, test_data_loader=None, test_writer=None, model=N
                 for k, v in data.items():
                     data[k] = utils.helpers.var_or_cuda(v)
 
-                partial = data['partial_cloud'] * 0.9
-                gt = data['gtcloud'] * 0.9
+                partial = data['partial_cloud']
+                gt = data['gtcloud']
 
                 b, n, _ = partial.shape
 

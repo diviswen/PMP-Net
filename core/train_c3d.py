@@ -12,7 +12,7 @@ from time import time
 from tensorboardX import SummaryWriter
 from core.test_c3d import test_net
 from utils.average_meter import AverageMeter
-from models.model import Model
+from models.model import PMPNet as Model
 from Chamfer3D.dist_chamfer_3D import chamfer_3DDist
 chamfer_dist = chamfer_3DDist()
 
@@ -74,7 +74,7 @@ def train_net(cfg):
     train_writer = SummaryWriter(os.path.join(cfg.DIR.LOGS, 'train'))
     val_writer = SummaryWriter(os.path.join(cfg.DIR.LOGS, 'test'))
 
-    model = Model()
+    model = Model(dataset=cfg.DATASET.TRAIN_DATASET)
     if torch.cuda.is_available():
         model = torch.nn.DataParallel(model).cuda()
 
@@ -89,7 +89,7 @@ def train_net(cfg):
     init_epoch = 0
     best_metrics = float('inf')
 
-    if 'WEIGHTS' in cfg.CONST:
+    if 'WEIGHTS' in cfg.CONST and cfg.CONST.WEIGHTS:
         logging.info('Recovering from %s ...' % (cfg.CONST.WEIGHTS))
         checkpoint = torch.load(cfg.CONST.WEIGHTS)
         best_metrics = checkpoint['best_metrics']
@@ -117,8 +117,8 @@ def train_net(cfg):
                 data_time.update(time() - batch_end_time)
                 for k, v in data.items():
                     data[k] = utils.helpers.var_or_cuda(v)
-                partial = data['partial_cloud'] * 0.9
-                gt = data['gtcloud'] * 0.9
+                partial = data['partial_cloud']
+                gt = data['gtcloud']
 
                 pcds, deltas = model(partial)
 

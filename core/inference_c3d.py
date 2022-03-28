@@ -8,7 +8,7 @@ import utils.data_loaders
 import utils.helpers
 import utils.io
 from tqdm import tqdm
-from models.model import Model
+from models.model import PMPNetPlus as Model
 
 
 def inference_net(cfg):
@@ -25,12 +25,13 @@ def inference_net(cfg):
                                                    pin_memory=True,
                                                    shuffle=False)
 
-    model = Model()
+    model = Model(dataset=cfg.DATASET.TRAIN_DATASET)
 
     if torch.cuda.is_available():
         model = torch.nn.DataParallel(model).cuda()
 
     # Load the pretrained model from a checkpoint
+    assert 'WEIGHTS' in cfg.CONST and cfg.CONST.WEIGHTS
     logging.info('Recovering from %s ...' % (cfg.CONST.WEIGHTS))
     checkpoint = torch.load(cfg.CONST.WEIGHTS)
     model.load_state_dict(checkpoint['model'])

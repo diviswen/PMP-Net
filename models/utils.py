@@ -370,7 +370,35 @@ def fps_subsample(pcd, n_points=2048):
     new_pcd = new_pcd.permute(0, 2, 1).contiguous()
     return new_pcd
 
+def square_distance(src, dst):
+    """
+    Calculate Euclid distance between each two points.
 
+    src^T * dst = xn * xm + yn * ym + zn * zm；
+    sum(src^2, dim=-1) = xn*xn + yn*yn + zn*zn;
+    sum(dst^2, dim=-1) = xm*xm + ym*ym + zm*zm;
+    dist = (xn - xm)^2 + (yn - ym)^2 + (zn - zm)^2
+         = sum(src**2,dim=-1)+sum(dst**2,dim=-1)-2*src^T*dst
+
+    Input:
+        src: source points, [B, N, C]
+        dst: target points, [B, M, C]
+    Output:
+        dist: per-point square distance, [B, N, M]
+    """
+    B, N, _ = src.shape
+    _, M, _ = dst.shape
+    dist = -2 * torch.matmul(src, dst.permute(0, 2, 1))  # B, N, M
+    dist += torch.sum(src ** 2, -1).view(B, N, 1)
+    dist += torch.sum(dst ** 2, -1).view(B, 1, M)
+    return dist
+
+def query_knn(nsample, xyz, new_xyz, include_self=True):
+    """Find k-NN of new_xyz in xyz"""
+    pad = 0 if include_self else 1
+    sqrdists = square_distance(new_xyz, xyz)  # B, S, N
+    idx = torch.argsort(sqrdists, dim=-1, descending=False)[:, :, pad: nsample+pad]
+    return idx.int()
 
 
 
