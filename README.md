@@ -4,8 +4,8 @@
 
 ## [NEWS]
 
-- **2022-03** [NEW:tada:]** The [Jittor](https://cg.cs.tsinghua.edu.cn/jittor/) version of both PMP-Net and PMP-Net++ will be coming soon.
-- **2022-02** [NEW:tada:]** [PMP-Net++](https://arxiv.org/abs/2012.03408), the journal extension of PMP-Net is accepted to [TPAMI 2020](https://ieeexplore.ieee.org/document/9735342). This repository now contains the code of both PMP-Net and PMP-Net++!
+- **2022-03 [NEW:tada:]** The [Jittor](https://cg.cs.tsinghua.edu.cn/jittor/) version of both PMP-Net and PMP-Net++ will be coming soon.
+- **2022-02 [NEW:tada:]** [PMP-Net++](https://arxiv.org/abs/2012.03408), the journal extension of PMP-Net is accepted to [TPAMI 2020](https://ieeexplore.ieee.org/document/9735342). This repository now contains the code of both PMP-Net and PMP-Net++!
 - **2021** [PMP-Net](https://arxiv.org/abs/2012.03408) is published at [CVPR 2021](https://openaccess.thecvf.com/content/CVPR2021/html/Wen_PMP-Net_Point_Cloud_Completion_by_Learning_Multi-Step_Point_Moving_Paths_CVPR_2021_paper.html), and the code is released!
 
 ## [PMP-Net++]
@@ -104,7 +104,7 @@ __C.DATASET.TRAIN_DATASET                        = 'ShapeNet'
 __C.DATASET.TEST_DATASET                         = 'ShapeNet'
 ```
 
-## Training, Testing and Inference
+#### Training, Testing and Inference
 
 To train PMP-Net++ or PMP-Net, you can simply use the following command:
 
