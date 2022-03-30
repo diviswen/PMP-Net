@@ -1,19 +1,20 @@
-# PMP-Net++: Point Cloud Completion by Transformer-Enhanced Multi-step Point Moving Paths (TPAMI 2022)
+# PMP-Net++: Point Cloud Completion by Transformer-Enhanced Multi-step Point Moving Paths (TPAMI 2022) (Jittor Implementation)
 
-[<img src="pics/network.png" width="100%" alt="Intro pic" />](pics/network.png)
+[<img src="../pics/network.png" width="100%" alt="Intro pic" />](../pics/network.png)
 
-## [NEWS]
-
-- **2022-03 [NEW:tada:]** The [Jittor](https://cg.cs.tsinghua.edu.cn/jittor/) implementations of both PMP-Net and PMP-Net++ are released in the [PMPPlus-Jittor](https://github.com/diviswen/PMP-Net/PMPPlus-Jittor) folder.
-- **2022-02 [NEW:tada:]** [PMP-Net++](https://arxiv.org/abs/2012.03408), the journal extension of PMP-Net is accepted to [TPAMI 2022](https://ieeexplore.ieee.org/document/9735342). This repository now contains the code of both PMP-Net and PMP-Net++!
-- **2021** [PMP-Net](https://arxiv.org/abs/2012.03408) is published at [CVPR 2021](https://openaccess.thecvf.com/content/CVPR2021/html/Wen_PMP-Net_Point_Cloud_Completion_by_Learning_Multi-Step_Point_Moving_Paths_CVPR_2021_paper.html), and the code is released!
 
 ## [PMP-Net++]
-This repository contains the PyTorch implementation and Jittor implementation of the papers:
+This repository contains the [Jittor](https://cg.cs.tsinghua.edu.cn/jittor/) implementation of the papers:
 
 **1. PMP-Net++: Point Cloud Completion by Transformer-Enhanced Multi-step Point Moving Paths, TPAMI 2022**
 
 **2. PMP-Net: Point Cloud Completion by Learning Multi-step Point Moving Paths, CVPR 2021**
+
+The implemented methods on different datasets include:
+| Model       | Completion3d   | PCN dataset |
+| ----------- | -------------- | ------------ |
+| PMP-Net     | √              | √            |
+| PMP-Net++   | √              | √            |
 
 [ [PMP-Net](https://arxiv.org/abs/2012.03408) | [PMP-Net++](https://arxiv.org/abs/2012.03408) | [IEEE Xplore](https://ieeexplore.ieee.org/document/9735342) | [Webpage]() | [Jittor](https://cg.cs.tsinghua.edu.cn/jittor/) ] 
 
@@ -60,35 +61,18 @@ We use the [PCN](https://www.shapenet.org/) and [Compeletion3D](http://completio
 - [PCN](https://drive.google.com/drive/folders/1P_W1tz5Q4ZLapUifuOE4rFAZp6L1XTJz)
 - [Completion3D](http://download.cs.stanford.edu/downloads/completion3d/dataset2019.zip)
 
-The pretrained models on Completion3D and PCN dataset are available as follows:
-
-- [PMP-Net_pre-trained](https://drive.google.com/drive/folders/1emGsfdnIj1eUtUxZlfiWiuJ0QJag4nOn?usp=sharing)
-
-Backup Links:
-
-- [PMP-Net_pre-trained](https://pan.baidu.com/s/1oQbaVI7yN9NmI_2E9tztGQ) (pwd: n7t4)
 
 #### Install Python Denpendencies
 
 ```
-cd PMP-Net
 conda create -n pmp python=3.7
 conda activate pmp
 pip3 install -r requirements.txt
-```
 
-#### Build PyTorch Extensions
-
-**NOTE:** PyTorch >= 1.4 of cuda version are required.
-
-```
-cd pointnet2_ops_lib
-python setup.py install
-
-cd ..
-
-cd Chamfer3D
-python setup.py install
+python3.7 -m pip install jittor
+python3.7 -m jittor.test.test_example
+python3.7 -m jittor.test.test_cudnn_op
+# more information about Jittor can be found at https://cg.cs.tsinghua.edu.cn/jittor/
 ```
 
 You need to update the file path of the datasets:
@@ -126,7 +110,7 @@ python main_*.py --inference
 
 ## [Acknowledgements]
 
-Some of the code of this repo is borrowed from [GRNet](https://github.com/hzxie/GRNet), [pytorchpointnet++](https://github.com/erikwijmans/Pointnet2_PyTorch) and [ChamferDistancePytorch](https://github.com/ThibaultGROUEIX/ChamferDistancePytorch). We thank the authors for their wonderful job!
+Some of the code of this repo is borrowed from [GRNet](https://github.com/hzxie/GRNet) and [PointCloudLib](https://github.com/Jittor/PointCloudLib). We thank the authors for their wonderful job!
 
 ## [License]
 
