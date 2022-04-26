@@ -87,12 +87,12 @@ class UpSamplePoints(object):
 
 
 class Dataset(DatasetJT):
-    def __init__(self, options, file_list, transforms=None, batch_size=1, shuffle=False, droplast=False):
+    def __init__(self, options, file_list, transforms=None, batch_size=1, shuffle=False, drop_last=False, num_workers=1):
         super().__init__()
         self.batch_size = batch_size
         self.shuffle = shuffle
         self.options = options
-        self.drop_last = droplast
+        self.drop_last = drop_last
         self.file_list = file_list
         self.transforms = transforms
         self.cache = dict()
@@ -101,7 +101,8 @@ class Dataset(DatasetJT):
             batch_size=self.batch_size,
             total_len=len(self.file_list),
             shuffle=self.shuffle,
-            drop_last=droplast)
+            num_workers=num_workers,
+            drop_last=drop_last)
 
 
     def __getitem__(self, idx):
@@ -153,7 +154,7 @@ class ShapeNetDataLoader(object):
         with open(cfg.DATASETS.SHAPENET.CATEGORY_FILE_PATH) as f:
             self.dataset_categories = json.loads(f.read())
 
-    def get_dataset(self, subset, batch_size=1, shuffle=False):
+    def get_dataset(self, subset, batch_size=1, shuffle=False, drop_last=False, num_workers=1):
         n_renderings = self.cfg.DATASETS.SHAPENET.N_RENDERINGS if subset == DatasetSubset.TRAIN else 1
         file_list = self._get_file_list(self.cfg, self._get_subset(subset), n_renderings)
         transforms = self._get_transforms(self.cfg, subset)
@@ -161,7 +162,7 @@ class ShapeNetDataLoader(object):
             'n_renderings': n_renderings,
             'required_items': ['partial_cloud', 'gtcloud'],
             'shuffle': subset == DatasetSubset.TRAIN
-        }, file_list, transforms, batch_size=batch_size, shuffle=shuffle)
+        }, file_list, transforms, batch_size=batch_size, shuffle=shuffle, drop_last=drop_last, num_workers=num_workers)
 
     def _get_transforms(self, cfg, subset):
         if subset == DatasetSubset.TRAIN:
@@ -250,14 +251,14 @@ class Completion3DDataLoader(object):
         with open(cfg.DATASETS.COMPLETION3D.CATEGORY_FILE_PATH) as f:
             self.dataset_categories = json.loads(f.read())
 
-    def get_dataset(self, subset, batch_size=1, shuffle=False, drop_last=False):
+    def get_dataset(self, subset, batch_size=1, shuffle=False, drop_last=False, num_workers=1):
         file_list = self._get_file_list(self.cfg, self._get_subset(subset))
         transforms = self._get_transforms(self.cfg, subset)
         required_items = ['partial_cloud'] if subset == DatasetSubset.TEST else ['partial_cloud', 'gtcloud']
         return Dataset({
             'required_items': required_items,
             'shuffle': subset == DatasetSubset.TRAIN
-        }, file_list, transforms, batch_size=batch_size, shuffle=shuffle)
+        }, file_list, transforms, batch_size=batch_size, shuffle=shuffle, drop_last=drop_last, num_workers=num_workers)
 
     def _get_transforms(self, cfg, subset):
         if subset == DatasetSubset.TRAIN:

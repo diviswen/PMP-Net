@@ -801,12 +801,106 @@ def knn_point(nsample, xyz, new_xyz):
     return group_idx
 
 
-def knn(x, k):
+def knn1(x, k):
     inner = -2 * jt.nn.bmm(x.transpose(0, 2, 1), x)
     xx = jt.sum(x ** 2, dim=1, keepdims=True)
     distance = -xx - inner - xx.transpose(0, 2, 1)
     idx = topk(distance, k=k, dim=-1)[1]
     return idx
+
+
+def knn(unknown, known, k):
+    b, n, c = unknown.shape
+    _, m, _ = known.shape
+    # dists2 = jt.ones((b, n, k), dtype="float") * 1e40
+    # idx = jt.zeros((b, n, k), dtype="int")
+    dists2 = jt.empty((b, n, k), dtype="float")
+    idx = jt.empty((b, n, k), dtype="int")
+    return jt.code([unknown, known], [dists2, idx],
+                   cuda_header='''
+    #define TOTAL_THREADS 512
+    #define K %s
+
+    namespace {
+        inline int opt_n_threads(int work_size) {
+            const int pow_2 = std::log(static_cast<double>(work_size)) / std::log(2.0);
+            return max(min(1 << pow_2, TOTAL_THREADS), 1);
+        }
+
+        __global__ void three_nn_kernel(int b, int n, int m,
+                                const float *__restrict__ unknown,
+                                const float *__restrict__ known,
+                                float *__restrict__ dist2,
+                                int *__restrict__ idx) {
+
+            int batch_index = blockIdx.x;
+            unknown += batch_index * n * 3;
+            known += batch_index * m * 3;
+            dist2 += batch_index * n * K;
+            idx += batch_index * n * K;
+
+            int index = threadIdx.x;
+            int stride = blockDim.x;
+            for (int j = index; j < n; j += stride) {
+                float ux = unknown[j * 3 + 0];
+                float uy = unknown[j * 3 + 1];
+                float uz = unknown[j * 3 + 2];
+
+                float tmp_dist[K];
+                int tmp_idx[K];
+                #pragma unroll
+                for (int i=0; i<K; i++) tmp_dist[i] = 1e30;
+                for (int k = 0; k < m; ++k) {
+                    float x = known[k * 3 + 0];
+                    float y = known[k * 3 + 1];
+                    float z = known[k * 3 + 2];
+                    float d = (ux - x) * (ux - x) + (uy - y) * (uy - y) + (uz - z) * (uz - z);
+
+                    int first = -1;
+                    #pragma unroll
+                    for (int i=0; i<K; i++)
+                        if (first == -1 && d<tmp_dist[i])
+                            first = i;
+                    if (first == -1) continue;
+                    #pragma unroll
+                    for (int i=0; i<K; i++)
+                        if (K-1-i > first) {
+                            tmp_dist[K-1-i] = tmp_dist[K-2-i];
+                            tmp_idx[K-1-i] = tmp_idx[K-2-i];
+                        }
+                    tmp_dist[first] = d;
+                    tmp_idx[first] = k;
+                    /*
+                    for (int l = 0; l < K; ++l) {
+                        if (d < dist2[j * K + l]) {
+                            for (int m = K-1; m > l; --m) {
+                                dist2[j * K + m] = dist2[j * K + m - 1];
+                                idx[j * K + m] = idx[j * K + m - 1];
+                            }
+                            dist2[j * K + l] = d;
+                            idx[j * K + l] = k;
+                            break;
+                        }
+                    }
+                    */
+                }
+                #pragma unroll
+                for (int i=0; i<K; i++) {
+                    dist2[j * K + i] = tmp_dist[i];
+                    idx[j * K + i] = tmp_idx[i];
+                }
+            }
+        }
+    }
+    ''' % k,
+                   cuda_src=f'''
+    @alias(unknown, in0)
+    @alias(known, in1)
+    @alias(dists2, out0)
+    @alias(idx, out1)
+
+    three_nn_kernel<<<{b}, opt_n_threads({n}), 0, 0>>>({b}, {n}, {m}, unknown_p, known_p, dists2_p, idx_p);
+    ''')
 
 
 def test_cuda_knn():

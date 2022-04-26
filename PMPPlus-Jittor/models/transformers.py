@@ -37,7 +37,8 @@ class Transformer(nn.Module):
         x_bcn = self.linear_start(x)
         b, dim, n = x_bcn.shape
         pos_bcn = pos.transpose(0, 2, 1)
-        idx_knn = knn(pos_bcn, self.n_knn)
+        _, idx_knn = knn(pos, pos, self.n_knn)
+        # idx_knn = knn(pos_bcn, self.n_knn)
 
         key = self.conv_key(x_bcn)
         value = self.conv_value(x_bcn)

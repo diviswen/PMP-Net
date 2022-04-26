@@ -14,6 +14,7 @@ from core.test_pcn import test_net
 from utils.average_meter import AverageMeter
 from models.model import PMPNetPlus as Model
 from core.chamfer import chamfer_loss_bidirectional as chamfer
+from jittor.utils.nvtx import nvtx_scope
 
 def random_subsample(pcd, n_points=2048):
     """
@@ -48,8 +49,10 @@ def train_net(cfg):
 
     train_data_loader = train_dataset_loader.get_dataset(dataloader_jt.DatasetSubset.TRAIN,
                                                          batch_size=cfg.TRAIN.BATCH_SIZE,
+                                                         num_workers=cfg.CONST.NUM_WORKERS,
                                                          shuffle=True)
     val_data_loader = test_dataset_loader.get_dataset(dataloader_jt.DatasetSubset.TEST,
+                                                      num_workers=cfg.CONST.NUM_WORKERS,
                                                       batch_size=4,
                                                       shuffle=False)
 
@@ -98,25 +101,29 @@ def train_net(cfg):
         with tqdm(train_data_loader) as t:
             for batch_idx, (taxonomy_ids, model_ids, data) in enumerate(t):
                 data_time.update(time() - batch_end_time)
-                partial = random_subsample(jittor.array(data['partial_cloud']))
-                gt = random_subsample(jittor.array(data['gtcloud']))
+                with nvtx_scope("model"):
+                    partial = random_subsample(jittor.array(data['partial_cloud']))
+                    gt = random_subsample(jittor.array(data['gtcloud']))
 
-                pcds, deltas = model(partial)
+                    pcds, deltas = model(partial)
 
-                cd1 = chamfer(pcds[0], gt)
-                cd2 = chamfer(pcds[1], gt)
-                cd3 = chamfer(pcds[2], gt)
-                loss_cd = cd1 + cd2 + cd3
+                    cd1 = chamfer(pcds[0], gt)
+                    cd2 = chamfer(pcds[1], gt)
+                    cd3 = chamfer(pcds[2], gt)
+                    loss_cd = cd1 + cd2 + cd3
 
-                delta_losses = []
-                for delta in deltas:
-                    delta_losses.append(jittor.sum(delta ** 2))
+                    delta_losses = []
+                    for delta in deltas:
+                        delta_losses.append(jittor.sum(delta ** 2))
 
-                loss_pmd = jittor.sum(jittor.stack(delta_losses)) / 3
+                    loss_pmd = jittor.sum(jittor.stack(delta_losses)) / 3
 
-                loss = loss_cd * cfg.TRAIN.LAMBDA_CD + loss_pmd * cfg.TRAIN.LAMBDA_PMD
+                    loss = loss_cd * cfg.TRAIN.LAMBDA_CD + loss_pmd * cfg.TRAIN.LAMBDA_PMD
 
-                optimizer.step(loss)
+                with nvtx_scope("step"):
+                    optimizer.step(loss)
+                with nvtx_scope("sync_all"):
+                    jittor.sync_all()
 
                 cd1_item = cd1.item() * 1e3
                 total_cd1 += cd1_item
