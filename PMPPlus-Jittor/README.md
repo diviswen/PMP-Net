@@ -10,7 +10,7 @@ This repository contains the [Jittor](https://cg.cs.tsinghua.edu.cn/jittor/) imp
 
 **2. PMP-Net: Point Cloud Completion by Learning Multi-step Point Moving Paths, CVPR 2021**
 
-The implemented methods on different datasets include:
+The **Jittor** implementation on different datasets:
 | Model       | Completion3d   | PCN dataset |
 | ----------- | -------------- | ------------ |
 | PMP-Net     | √              | √            |
