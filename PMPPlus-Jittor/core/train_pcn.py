@@ -117,8 +117,7 @@ def train_net(cfg):
                 loss = loss_cd * cfg.TRAIN.LAMBDA_CD + loss_pmd * cfg.TRAIN.LAMBDA_PMD
 
                 optimizer.step(loss)
-                with nvtx_scope("sync_all"):
-                    jittor.sync_all()
+                jittor.sync_all()
 
                 loss_item = loss.item()
                 loss_metric.update(loss_item)

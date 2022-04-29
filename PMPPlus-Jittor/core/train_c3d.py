@@ -102,8 +102,7 @@ def train_net(cfg):
                 loss_item = loss.item()
                 loss_metric.update(loss_item)
 
-                with nvtx_scope("sync_all"):
-                    jittor.sync_all()
+                jittor.sync_all()
 
                 t.set_description(
                     '[Epoch %d/%d][Batch %d/%d]' % (epoch_idx, cfg.TRAIN.N_EPOCHS, batch_idx + 1, n_batches))
