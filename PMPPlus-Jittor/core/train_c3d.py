@@ -73,79 +73,48 @@ def train_net(cfg):
     # Training/Testing the network
     for epoch_idx in range(init_epoch + 1, cfg.TRAIN.N_EPOCHS + 1):
         epoch_start_time = time()
-        # cd_eval = test_net(cfg, epoch_idx, val_data_loader, val_writer, model)
-        batch_time = AverageMeter()
-        data_time = AverageMeter()
-        # cd_eval = test_net(cfg, epoch_idx, val_data_loader, val_writer, model)
+
         model.train()
 
-        total_cd1 = 0
-        total_cd2 = 0
-        total_cd3 = 0
-        total_pmd = 0
-        batch_end_time = time()
+        loss_metric = AverageMeter()
         n_batches = len(train_data_loader)
         print('epoch: ', epoch_idx, 'optimizer: ', lr_scheduler.get_lr())
         with tqdm(train_data_loader) as t:
             for batch_idx, (taxonomy_ids, model_ids, data) in enumerate(t):
-                with nvtx_scope("model"):
-                    partial = jittor.array(data['partial_cloud'])
-                    gt = jittor.array(data['gtcloud'])
-                    pcds, deltas = model(partial)
+                partial = jittor.array(data['partial_cloud'])
+                gt = jittor.array(data['gtcloud'])
+                pcds, deltas = model(partial)
 
-                    cd1 = chamfer(pcds[0], gt)
-                    cd2 = chamfer(pcds[1], gt)
-                    cd3 = chamfer(pcds[2], gt)
-                    loss_cd = cd1 + cd2 + cd3
+                cd1 = chamfer(pcds[0], gt)
+                cd2 = chamfer(pcds[1], gt)
+                cd3 = chamfer(pcds[2], gt)
+                loss_cd = cd1 + cd2 + cd3
 
-                    delta_losses = []
-                    for delta in deltas:
-                        delta_losses.append(jittor.sum(delta ** 2))
+                delta_losses = []
+                for delta in deltas:
+                    delta_losses.append(jittor.sum(delta ** 2))
 
-                    loss_pmd = jittor.sum(jittor.stack(delta_losses)) / 3
+                loss_pmd = jittor.sum(jittor.stack(delta_losses)) / 3
 
-                    loss = loss_cd * cfg.TRAIN.LAMBDA_CD + loss_pmd * cfg.TRAIN.LAMBDA_PMD
-
-                    cd1_item = cd1.item() * 1e3
-                    total_cd1 += cd1_item
-                    cd2_item = cd2.item() * 1e3
-                    total_cd2 += cd2_item
-                    cd3_item = cd3.item() * 1e3
-                    total_cd3 += cd3_item
-                    pmd_item = loss_pmd.item()
-                    total_pmd += pmd_item
-
-                with nvtx_scope("step"):
-                    optimizer.step(loss)
+                loss = loss_cd * cfg.TRAIN.LAMBDA_CD + loss_pmd * cfg.TRAIN.LAMBDA_PMD
+                loss_item = loss.item()
+                loss_metric.update(loss_item)
+                optimizer.step(loss)
                 with nvtx_scope("sync_all"):
                     jittor.sync_all()
 
-                n_itr = (epoch_idx - 1) * n_batches + batch_idx
-                train_writer.add_scalar('Loss/Batch/cd1', cd1_item, n_itr)
-                train_writer.add_scalar('Loss/Batch/cd2', cd2_item, n_itr)
-                train_writer.add_scalar('Loss/Batch/cd3', cd3_item, n_itr)
-                train_writer.add_scalar('Loss/Batch/pmd', pmd_item, n_itr)
-                batch_time.update(time() - batch_end_time)
-                batch_end_time = time()
                 t.set_description(
                     '[Epoch %d/%d][Batch %d/%d]' % (epoch_idx, cfg.TRAIN.N_EPOCHS, batch_idx + 1, n_batches))
-                t.set_postfix(loss='%s' % ['%.4f' % l for l in [cd1_item, cd2_item, cd3_item, pmd_item]])
+                t.set_postfix(loss='%s' % ['%.4f' % l for l in [loss_item]])
 
-        avg_cd1 = total_cd1 / n_batches
-        avg_cd2 = total_cd2 / n_batches
-        avg_cd3 = total_cd3 / n_batches
-        avg_pmd = total_pmd / n_batches
 
         lr_scheduler.step()
         epoch_end_time = time()
-        train_writer.add_scalar('Loss/Epoch/cd1', avg_cd1, epoch_idx)
-        train_writer.add_scalar('Loss/Epoch/cd2', avg_cd2, epoch_idx)
-        train_writer.add_scalar('Loss/Epoch/cd3', avg_cd3, epoch_idx)
-        train_writer.add_scalar('Loss/Epoch/pmd', avg_pmd, epoch_idx)
+        train_writer.add_scalar('Loss/Epoch/loss', loss_metric.avg(), epoch_idx)
         logging.info(
             '[Epoch %d/%d] EpochTime = %.3f (s) Losses = %s' %
             (epoch_idx, cfg.TRAIN.N_EPOCHS, epoch_end_time - epoch_start_time,
-             ['%.4f' % l for l in [avg_cd1, avg_cd2, avg_cd3, avg_pmd]]))
+             ['%.4f' % l for l in [loss_metric.avg()]]))
 
         # Validate the current model
         cd_eval = test_net(cfg, epoch_idx, val_data_loader, val_writer, model)
