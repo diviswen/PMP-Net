@@ -97,9 +97,11 @@ def train_net(cfg):
                 loss_pmd = jittor.sum(jittor.stack(delta_losses)) / 3
 
                 loss = loss_cd * cfg.TRAIN.LAMBDA_CD + loss_pmd * cfg.TRAIN.LAMBDA_PMD
+                optimizer.step(loss)
+
                 loss_item = loss.item()
                 loss_metric.update(loss_item)
-                optimizer.step(loss)
+
                 with nvtx_scope("sync_all"):
                     jittor.sync_all()
 
