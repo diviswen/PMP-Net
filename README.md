@@ -1,17 +1,17 @@
-# PMP-Net++: Point Cloud Completion by Transformer-Enhanced Multi-step Point Moving Paths (TPAMI 2022)
+# PMP-Net++: Point Cloud Completion by Transformer-Enhanced Multi-step Point Moving Paths (TPAMI 2023)
 
 [<img src="pics/network.png" width="100%" alt="Intro pic" />](pics/network.png)
 
 ## [NEWS]
 
 - **2022-03 [NEW:tada:]** The [Jittor](https://cg.cs.tsinghua.edu.cn/jittor/) implementations of both PMP-Net and PMP-Net++ are released in the [PMPPlus-Jittor](https://github.com/diviswen/PMP-Net/tree/main/PMPPlus-Jittor) folder.
-- **2022-02 [NEW:tada:]** [PMP-Net++](https://arxiv.org/abs/2012.03408), the journal extension of PMP-Net is accepted to [TPAMI 2022](https://ieeexplore.ieee.org/document/9735342). This repository now contains the code of both PMP-Net and PMP-Net++!
+- **2022-02 [NEW:tada:]** [PMP-Net++](https://arxiv.org/abs/2012.03408), the journal extension of PMP-Net is accepted to [TPAMI 2023](https://ieeexplore.ieee.org/document/9735342). This repository now contains the code of both PMP-Net and PMP-Net++!
 - **2021** [PMP-Net](https://arxiv.org/abs/2012.03408) is published at [CVPR 2021](https://openaccess.thecvf.com/content/CVPR2021/html/Wen_PMP-Net_Point_Cloud_Completion_by_Learning_Multi-Step_Point_Moving_Paths_CVPR_2021_paper.html), and the code is released!
 
 ## [PMP-Net++]
 This repository contains the PyTorch implementation and Jittor implementation of the papers:
 
-**1. PMP-Net++: Point Cloud Completion by Transformer-Enhanced Multi-step Point Moving Paths, TPAMI 2022**
+**1. PMP-Net++: Point Cloud Completion by Transformer-Enhanced Multi-step Point Moving Paths, TPAMI 2023**
 
 **2. PMP-Net: Point Cloud Completion by Learning Multi-step Point Moving Paths, CVPR 2021**
 
@@ -34,15 +34,14 @@ completion/up-sampling methods
 
 ```
 @ARTICLE{pmpnet++,
-    author={Wen, Xin and Xiang, Peng and Han, Zhizhong and Cao, Yan-Pei and Wan, Pengfei and Zheng, Wen and Liu, Yu-Shen},
-    journal={IEEE Transactions on Pattern Analysis and Machine Intelligence}, 
-    title={PMP-Net++: Point Cloud Completion by Transformer-Enhanced Multi-step Point Moving Paths}, 
-    year={2022},
-    volume={},
-    number={},
-    pages={1-1},
-    doi={10.1109/TPAMI.2022.3159003}
-}
+  author={Wen, Xin and Xiang, Peng and Han, Zhizhong and Cao, Yan-Pei and Wan, Pengfei and Zheng, Wen and Liu, Yu-Shen},
+  journal={IEEE Transactions on Pattern Analysis and Machine Intelligence}, 
+  title={PMP-Net++: Point Cloud Completion by Transformer-Enhanced Multi-Step Point Moving Paths}, 
+  year={2023},
+  volume={45},
+  number={1},
+  pages={852-867},
+  doi={10.1109/TPAMI.2022.3159003}}
 
 @inproceedings{wen2021pmp,
     title={PMP-Net: Point cloud completion by learning multi-step point moving paths},
