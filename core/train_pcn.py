@@ -10,7 +10,7 @@ from datetime import datetime
 from tqdm import tqdm
 from time import time
 from tensorboardX import SummaryWriter
-from core.test_c3d import test_net
+from core.test_pcn import test_net
 from utils.average_meter import AverageMeter
 from models.model import PMPNetPlus as Model
 from Chamfer3D.dist_chamfer_3D import chamfer_3DDist
